@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5f1e7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Casebook">
+<title>Casebook · Senior Engineer Interviews</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,500;1,9..144,600&family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f5f1e7;
+  --paper-card: #fbf8ee;
+  --paper-soft: #efe9d8;
+  --ink: #1e1a14;
+  --ink-soft: #4a4338;
+  --ink-faded: #8b8270;
+  --line: #d8d0bc;
+  --line-soft: #e6ddc9;
+  --red: #9c2a1f;
+  --red-soft: rgba(156, 42, 31, 0.09);
+  --shadow-sm: 0 1px 0 rgba(30, 26, 20, 0.04);
+  --shadow-md: 0 2px 12px rgba(30, 26, 20, 0.06);
+  --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body { background: var(--paper); }
+
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  line-height: 1.45;
+  font-size: 16px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12 0 0 0 0 0.10 0 0 0 0 0.08 0 0 0 0.04 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
+  background-attachment: fixed;
+  padding-top: env(safe-area-inset-top);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 20px 32px;
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen { display: none; flex: 1; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ── Wordmark / top bar ──────────────────────────────────────────────── */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 0 18px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.wordmark {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+}
+
+.wordmark .dot { color: var(--red); }
+
+.topbar-back {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 10px;
+  margin: -8px -10px;
+  font-weight: 500;
+}
+.topbar-back:hover { color: var(--ink); }
+.topbar-back::before { content: '← '; }
+
+/* ── Library screen ──────────────────────────────────────────────────── */
+
+.library-header {
+  padding: 16px 0 28px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 24px;
+}
+
+.library-title {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(2.1rem, 7vw, 2.85rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 96;
+  margin-bottom: 6px;
+}
+.library-title em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--red);
+}
+
+.library-sub {
+  font-size: 0.92rem;
+  color: var(--ink-faded);
+  max-width: 38em;
+  line-height: 1.5;
+}
+
+.library-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 18px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+}
+.library-stats strong { color: var(--ink); font-weight: 600; }
+
+.new-cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 16px 22px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: -0.005em;
+  width: 100%;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.08s;
+}
+.new-cta:active { transform: scale(0.99); }
+.new-cta .plus {
+  width: 22px; height: 22px;
+  border: 1.5px solid var(--paper);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 1rem;
+  line-height: 1;
+}
+.new-cta .label-text { flex: 1; text-align: left; }
+.new-cta .arrow {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  opacity: 0.6;
+}
+
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--paper-card);
+}
+.empty-state h3 {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.35rem;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+.empty-state p {
+  font-size: 0.88rem;
+  color: var(--ink-faded);
+}
+
+.section-heading {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-heading::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line-soft);
+}
+
+.interview-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+
+.interview-card {
+  background: var(--paper-card);
+  border: 1px solid var(--line-soft);
+  border-radius: 5px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color 0.1s, transform 0.08s;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  position: relative;
+  overflow: hidden;
+}
+.interview-card:hover { border-color: var(--line); }
+.interview-card:active { transform: scale(0.995); }
+
+.interview-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--line-soft);
+}
+.interview-card.in-progress::before { background: var(--red); }
+.interview-card.completed::before { background: var(--ink); }
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.card-name {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.18rem;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 36;
+}
+.card-meta {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-faded);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.card-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.card-role { font-style: italic; color: var(--ink-faded); }
+
+.card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.card-status.status-progress { background: var(--red-soft); color: var(--red); }
+.card-status.status-done { background: rgba(30, 26, 20, 0.07); color: var(--ink); }
+.card-status.status-strong { background: var(--ink); color: var(--paper); }
+.card-status.status-maybe { background: rgba(139, 130, 112, 0.18); color: var(--ink-soft); }
+.card-status.status-no { background: var(--red-soft); color: var(--red); }
+
+.library-footer {
+  margin-top: auto;
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-faded);
+}
+.footer-link {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  padding: 6px 0;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+.footer-link:hover { color: var(--ink); text-decoration-color: currentColor; }
+.footer-link.danger:hover { color: var(--red); }
+
+/* ── Setup screen ────────────────────────────────────────────────────── */
+
+.setup-heading {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(1.6rem, 5.5vw, 2rem);
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  font-variation-settings: "opsz" 72;
+}
+.setup-heading em { font-style: italic; font-weight: 400; color: var(--red); }
+.setup-sub {
+  font-size: 0.9rem;
+  color: var(--ink-faded);
+  margin-bottom: 32px;
+}
+
+.field { margin-bottom: 18px; }
+.field-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 7px;
+}
+.field-label .req { color: var(--red); margin-left: 4px; }
+
+input[type=text], input[type=date], textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font-family: var(--sans);
+  font-size: 16px; /* prevents iOS zoom */
+  color: var(--ink);
+  background: var(--paper-card);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.1s, background 0.1s;
+}
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+  background: #fff;
+}
+input::placeholder, textarea::placeholder { color: var(--ink-faded); opacity: 0.65; }
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+/* ── Question screen ─────────────────────────────────────────────────── */
+
+.q-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: 24px;
+}
+
+.q-status-left, .q-status-right {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+}
+.q-status-left .case-no { color: var(--ink); font-weight: 500; }
+.q-status-right .candidate-name {
+  color: var(--ink-soft);
+  max-width: 14em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.dots {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.dot {
+  flex: 1;
+  height: 3px;
+  background: var(--line-soft);
+  border-radius: 2px;
+  min-width: 18px;
+  transition: background 0.2s;
+}
+.dot.done { background: var(--ink); }
+.dot.skipped { background: var(--ink-faded); opacity: 0.4; }
+.dot.current { background: var(--red); }
+
+.q-tags {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.tag-required {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--red);
+  border: 1.5px solid var(--red);
+  padding: 3px 8px 2px;
+  border-radius: 2px;
+  background: var(--red-soft);
+  transform: rotate(-1deg);
+  display: inline-block;
+}
+.tag-optional {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  padding: 3px 8px 2px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.tag-time {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-faded);
+}
+.tag-time::before { content: '⏱ '; }
+
+.q-label-line {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 12px;
+}
+
+.q-text {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.55rem, 5.5vw, 1.95rem);
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  margin-bottom: 12px;
+  font-variation-settings: "opsz" 96;
+}
+.q-text::before {
+  content: '“';
+  font-style: normal;
+  color: var(--red);
+  margin-right: 0.05em;
+}
+.q-text::after {
+  content: '”';
+  font-style: normal;
+  color: var(--red);
+  margin-left: 0.05em;
+}
+
+.q-skip-hint {
+  font-size: 0.82rem;
+  color: var(--ink-faded);
+  font-style: italic;
+  margin-bottom: 26px;
+  padding-left: 12px;
+  border-left: 2px solid var(--line-soft);
+}
+.q-no-hint { margin-bottom: 26px; }
+
+.expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 8px 14px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: all 0.1s;
+}
+.expand-btn:hover { background: var(--paper-card); border-color: var(--ink-soft); }
+.expand-btn .arrow {
+  font-size: 0.7rem;
+  transition: transform 0.15s;
+  display: inline-block;
+}
+.expand-btn.open .arrow { transform: rotate(90deg); }
+.expand-btn.open { background: var(--paper-card); border-color: var(--ink-soft); }
+
+.drills-panel {
+  display: none;
+  background: var(--paper-card);
+  border-left: 3px solid var(--red);
+  padding: 14px 18px 14px 22px;
+  margin-bottom: 24px;
+  border-radius: 0 3px 3px 0;
+}
+.drills-panel.open { display: block; }
+.drills-panel ol { padding-left: 18px; counter-reset: drill; list-style: none; }
+.drills-panel li {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  padding-left: 4px;
+  position: relative;
+  counter-increment: drill;
+}
+.drills-panel li::before {
+  content: counter(drill);
+  position: absolute;
+  left: -22px;
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--red);
+  top: 4px;
+  font-weight: 500;
+}
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.signals-list { margin-bottom: 8px; }
+
+.sig-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 10px 0;
+  cursor: pointer;
+  border-bottom: 1px dotted var(--line-soft);
+}
+.sig-row:last-child { border-bottom: none; }
+.sig-row input[type=checkbox] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid var(--line);
+  border-radius: 3px;
+  background: var(--paper-card);
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  margin-top: 1px;
+  transition: all 0.1s;
+}
+.sig-row input[type=checkbox]:hover { border-color: var(--ink-soft); }
+.sig-row input[type=checkbox]:checked {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.sig-row input[type=checkbox]:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 11px;
+  border: solid var(--paper);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.sig-row span {
+  font-size: 0.92rem;
+  color: var(--ink);
+  line-height: 1.45;
+  user-select: none;
+  padding-top: 1px;
+}
+.sig-row:has(input:checked) span {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.cross-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faded);
+  cursor: pointer;
+  padding: 12px 0;
+  margin-top: 4px;
+}
+.cross-toggle:hover { color: var(--ink-soft); }
+.cross-panel { display: none; margin-bottom: 20px; }
+.cross-panel.open { display: block; }
+
+.notes-section { margin: 24px 0 20px; }
+
+/* ── Nav (bottom-sticky on question screen) ──────────────────────────── */
+
+.nav {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to bottom, transparent 0%, var(--paper) 14%);
+  padding: 20px 0 calc(20px + env(safe-area-inset-bottom));
+  margin: 16px -20px 0;
+  padding-left: 20px;
+  padding-right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 10;
+}
+
+.btn {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.92rem;
+  letter-spacing: -0.005em;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 13px 22px;
+  transition: all 0.08s;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn:active { transform: scale(0.985); }
+
+.btn-primary {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.btn-primary:hover { background: #000; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn-secondary:hover { border-color: var(--ink); }
+
+.btn-skip {
+  background: none;
+  border: none;
+  color: var(--ink-faded);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 12px;
+  min-height: 48px;
+}
+.btn-skip:hover { color: var(--ink-soft); }
+
+.nav-actions { display: flex; align-items: center; gap: 6px; }
+
+/* ── End screen ──────────────────────────────────────────────────────── */
+
+.end-heading {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(2rem, 6.5vw, 2.6rem);
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  margin-bottom: 6px;
+  font-variation-settings: "opsz" 96;
+}
+.end-heading em { font-style: italic; color: var(--red); }
+
+.end-meta {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-faded);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.end-meta span { color: var(--ink-soft); }
+.end-meta .sep { color: var(--line); margin: 0 8px; }
+
+.impression-row { display: flex; gap: 8px; margin-bottom: 28px; }
+.imp-btn {
+  flex: 1;
+  padding: 14px 8px;
+  background: var(--paper-card);
+  border: 1.5px solid var(--line);
+  border-radius: 4px;
+  font-family: var(--sans);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.1s;
+  min-height: 56px;
+}
+.imp-btn:hover { border-color: var(--ink-soft); }
+.imp-btn.selected.imp-strong {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.imp-btn.selected.imp-maybe {
+  background: var(--paper-soft);
+  border-color: var(--ink-soft);
+  color: var(--ink);
+}
+.imp-btn.selected.imp-no {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--paper);
+}
+
+.summary { margin: 28px 0 0; }
+
+.sum-item {
+  background: var(--paper-card);
+  border: 1px solid var(--line-soft);
+  border-radius: 4px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.sum-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--line);
+}
+.sum-item.has-signals::before { background: var(--ink); }
+.sum-item.skipped { opacity: 0.45; }
+
+.sum-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.sum-label {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+.sum-label em { font-style: italic; color: var(--ink-faded); font-weight: 400; font-size: 0.85rem; }
+.sum-score {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-faded);
+  white-space: nowrap;
+}
+.sum-signals-line {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-top: 5px;
+  line-height: 1.5;
+}
+.sum-signals-line .check { color: var(--red); margin-right: 4px; }
+.sum-notes {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  margin-top: 8px;
+  white-space: pre-wrap;
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+  line-height: 1.55;
+}
+
+.export-section {
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+
+.export-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 1rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: -0.005em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.export-btn::after { content: '↓'; font-family: var(--mono); }
+.export-btn:hover { background: #000; }
+
+.end-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.end-actions .btn { flex: 1; padding: 13px; font-size: 0.88rem; }
+
+.divider {
+  height: 1px;
+  background: var(--line);
+  margin: 32px 0;
+}
+
+/* ── Small screens (extra tight) ──────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .app { padding: 0 16px 24px; }
+  .nav { margin: 16px -16px 0; padding-left: 16px; padding-right: 16px; }
+  .q-text::before, .q-text::after { display: none; }
+  .q-text { padding: 0; }
+  .impression-row { gap: 6px; }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main class="app" id="app">
+  <!-- ────── Library screen ────── -->
+  <section class="screen" id="screen-library">
+    <header class="topbar">
+      <div class="wordmark">Casebook<span class="dot">.</span></div>
+    </header>
+
+    <div class="library-header">
+      <h1 class="library-title">Senior engineer<br><em>interviews</em></h1>
+      <p class="library-sub">A field casebook for evaluating production-ready senior engineers. Every interview saved on this device.</p>
+      <div class="library-stats" id="library-stats"></div>
+    </div>
+
+    <button class="new-cta" onclick="startNewInterview()">
+      <span class="plus">+</span>
+      <span class="label-text">New interview</span>
+      <span class="arrow">→</span>
+    </button>
+
+    <div id="library-content"></div>
+
+    <footer class="library-footer">
+      <button class="footer-link" onclick="exportAllJSON()">Export backup (all interviews, JSON)</button>
+      <button class="footer-link" onclick="importBackup()">Import backup</button>
+      <button class="footer-link danger" onclick="confirmWipe()">Delete all data</button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="onImportFile(event)">
+    </footer>
+  </section>
+
+  <!-- ────── Setup screen ────── -->
+  <section class="screen" id="screen-setup">
+    <header class="topbar">
+      <button class="topbar-back" onclick="goLibrary()">Library</button>
+      <div class="wordmark">New file<span class="dot">.</span></div>
+    </header>
+
+    <h2 class="setup-heading">Open a <em>case file</em></h2>
+    <p class="setup-sub">Who are you interviewing today?</p>
+
+    <div class="field">
+      <label class="field-label" for="f-candidate">Candidate name <span class="req">*</span></label>
+      <input type="text" id="f-candidate" placeholder="Jane Doe" autocomplete="off" autocapitalize="words" spellcheck="false">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-role">Role</label>
+      <input type="text" id="f-role" placeholder="Senior Engineer" autocomplete="off">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-date">Date</label>
+      <input type="date" id="f-date">
+    </div>
+    <div class="field">
+      <label class="field-label" for="f-interviewer">Interviewer</label>
+      <input type="text" id="f-interviewer" placeholder="Your name" autocomplete="off">
+    </div>
+
+    <div class="nav" style="margin-top:24px">
+      <button class="btn btn-secondary" onclick="goLibrary()">Cancel</button>
+      <button class="btn btn-primary" onclick="commitNewInterview()">Begin →</button>
+    </div>
+  </section>
+
+  <!-- ────── Question screen (rendered dynamically) ────── -->
+  <section class="screen" id="screen-question"></section>
+
+  <!-- ────── End screen (rendered dynamically) ────── -->
+  <section class="screen" id="screen-end"></section>
+</main>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────
+
+const QUESTIONS = [
+  {
+    id: 'opening', label: '48h Production Access', required: true, time: '8–10 min',
+    text: "Imagine you get production access to our system tomorrow. What do you try to understand in the first 48 hours?",
+    drills: [
+      "Tell me exactly what you'd do first.",
+      "What risks would you look for?",
+      "How would you figure out what's critical vs what can wait?",
+      "What would you not touch yet — and why?"
+    ],
+    signals: [
+      "Asked about risk before suggesting changes",
+      "Mentioned observability / logs",
+      "Asked about deploy / rollback process",
+      "Mapped the critical path",
+      "Asked about auth",
+      "Asked questions before proposing anything",
+      "Talked about domain, not just tech stack"
+    ]
+  },
+  {
+    id: 'incident', label: 'Most uncomfortable incident', required: true, time: '6–8 min',
+    text: "Tell me about the most uncomfortable incident you've been through.",
+    drills: [
+      "Tell me exactly how that happened.",
+      "What was the first signal?",
+      "What did you do first?",
+      "What went wrong?",
+      "What would you do differently today?"
+    ],
+    signals: [
+      "Named a specific incident (not generic)",
+      'Said "I" not just "we"',
+      "Named the first signal",
+      "Described what went wrong",
+      "Has a 'would do differently' answer",
+      "Showed emotional honesty — not just technical summary"
+    ]
+  },
+  {
+    id: 'production_down', label: 'Took down production', required: true, time: '5–7 min',
+    text: "Have you ever taken down production? Walk me through it.",
+    drills: [
+      "How did you find out?",
+      "What was the root cause?",
+      "How did you recover?",
+      "What happened after — postmortem, follow-up action?"
+    ],
+    signals: [
+      'Has actually done it (not "almost")',
+      "Named root cause",
+      "Named how they found out",
+      "Described the recovery",
+      "Postmortem or follow-up existed"
+    ]
+  },
+  {
+    id: 'hardest_bug', label: 'Hardest bug', required: true, time: '4–6 min',
+    text: "What's the hardest bug you've ever debugged?",
+    drills: [
+      "Tell me exactly how that happened.",
+      "What was the first signal?",
+      "What tools did you use?",
+      "How long did it take — and why longer than expected?"
+    ],
+    signals: [
+      "Specific bug, not a category",
+      "Described debugging process, not just the solution",
+      "Named tools used",
+      "Took longer than expected — and knows why"
+    ]
+  },
+  {
+    id: 'rollback', label: 'Emergency rollback', required: false, time: '4–5 min',
+    skipHint: 'Skip if rollback already came up in the incident question.',
+    text: "Have you ever had to do an emergency rollback? What triggered it?",
+    drills: [
+      "What triggered the decision?",
+      "What was the rollback mechanism?",
+      "What happened after?"
+    ],
+    signals: [
+      "Has done it under pressure (not just planned)",
+      "Knows the rollback mechanism at their company",
+      "Describes what triggered the decision"
+    ]
+  },
+  {
+    id: 'oncall', label: 'On-call setup', required: false, time: '2–3 min',
+    skipHint: 'Skip if on-call came up naturally earlier.',
+    text: "What does your on-call setup look like at your current job?",
+    drills: ["Who gets paged?", "What's the escalation path?", "Tell me about a time you got paged."],
+    signals: ["Has been on-call personally", "Describes rotation and escalation", "Has a story from an actual page"]
+  },
+  {
+    id: 'monitoring', label: 'Monitoring stack', required: false, time: '5–7 min',
+    skipHint: 'Skip if monitoring came up in the incident question.',
+    text: "What were you monitoring? Walk me through the stack. What was the most important alert you had?",
+    drills: [
+      "What did you personally own vs inherit?",
+      "Which incident did monitoring help you catch?",
+      "What did you find that you didn't expect?"
+    ],
+    signals: [
+      'Names a real stack (not just "we had Datadog")',
+      "Describes what they personally owned",
+      "Named most important alert and why",
+      "Has a story about something unexpected surfacing"
+    ]
+  },
+  {
+    id: 'regret', label: 'Technical regret', required: true, time: '5–6 min',
+    text: "Tell me about a technical decision you made that you later regretted.",
+    drills: [
+      "What made you choose that at the time?",
+      "When did you realize it was wrong?",
+      "What was the cost?",
+      "What would you do differently today?"
+    ],
+    signals: [
+      "Names a real decision (not vague)",
+      "Accepts personal responsibility",
+      "Has a concrete 'would do differently'",
+      "Shows judgment about why it seemed right then"
+    ]
+  },
+  {
+    id: 'ai_workflow', label: 'AI workflow', required: false, time: '4–6 min',
+    skipHint: 'Skip if role is not expected to work autonomously with AI.',
+    text: "Give me a real example where AI dramatically changed your velocity.",
+    drills: [
+      "Walk me through the specific task.",
+      "Which parts still needed human judgment?",
+      "What did AI get wrong?"
+    ],
+    signals: [
+      "Real example with specifics",
+      "Names limits or human judgment required",
+      'Not just "autocomplete"',
+      "Aware of failure modes"
+    ]
+  }
+];
+
+const CROSS_SIGNALS = [
+  'Uses "I" consistently',
+  'Names numbers / dates / specifics',
+  'Asks clarifying questions',
+  "Volunteers what they don't know"
+];
+
+const STORAGE_KEY = 'casebook_v1';
+
+// ── State ─────────────────────────────────────────────────────────────────
+
+let store = { interviews: [] };
+let currentId = null;
+
+function loadStore() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) store = JSON.parse(saved);
+    if (!Array.isArray(store.interviews)) store.interviews = [];
+  } catch (e) { store = { interviews: [] }; }
+}
+function saveStore() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); } catch (e) {}
+}
+
+function uuid() {
+  if (crypto && crypto.randomUUID) return crypto.randomUUID();
+  return 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+}
+
+function newInterview() {
+  return {
+    id: uuid(),
+    candidate: '', role: '', date: '', interviewer: '',
+    createdAt: Date.now(), updatedAt: Date.now(),
+    answers: {}, currentIndex: 0,
+    started: false, finished: false,
+    impression: '', globalNotes: ''
+  };
+}
+
+function getInterview(id) { return store.interviews.find(i => i.id === id); }
+
+function getAnswer(interview, qid) {
+  if (!interview.answers[qid]) {
+    interview.answers[qid] = { signals: [], crossSignals: [], notes: '', skipped: false };
+  }
+  return interview.answers[qid];
+}
+
+function touch(interview) { interview.updatedAt = Date.now(); saveStore(); }
+
+// ── Library screen ────────────────────────────────────────────────────────
+
+function renderLibrary() {
+  showScreen('screen-library');
+  currentId = null;
+
+  const list = [...store.interviews].sort((a, b) => b.updatedAt - a.updatedAt);
+  const inProgress = list.filter(i => i.started && !i.finished);
+  const completed = list.filter(i => i.finished);
+  const notStarted = list.filter(i => !i.started);
+
+  const stats = document.getElementById('library-stats');
+  stats.innerHTML = list.length
+    ? `<span><strong>${list.length}</strong> total</span>
+       ${inProgress.length ? `<span><strong>${inProgress.length}</strong> in progress</span>` : ''}
+       ${completed.length ? `<span><strong>${completed.length}</strong> completed</span>` : ''}`
+    : '';
+
+  const content = document.getElementById('library-content');
+  if (list.length === 0) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <h3>No case files yet</h3>
+        <p>Tap “New interview” above to open your first one.</p>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+  if (inProgress.length) {
+    html += `<div class="section-heading">In progress</div>`;
+    html += `<div class="interview-list">${inProgress.map(cardHtml).join('')}</div>`;
+  }
+  if (completed.length) {
+    html += `<div class="section-heading">Completed</div>`;
+    html += `<div class="interview-list">${completed.map(cardHtml).join('')}</div>`;
+  }
+  if (notStarted.length) {
+    html += `<div class="section-heading">Drafts</div>`;
+    html += `<div class="interview-list">${notStarted.map(cardHtml).join('')}</div>`;
+  }
+  content.innerHTML = html;
+
+  content.querySelectorAll('.interview-card').forEach(card => {
+    card.addEventListener('click', () => openInterview(card.dataset.id));
+  });
+}
+
+function cardHtml(i) {
+  const cls = i.finished ? 'completed' : (i.started ? 'in-progress' : '');
+  const done = Object.values(i.answers).filter(a => a.signals.length || a.crossSignals.length || a.notes || a.skipped).length;
+  const total = QUESTIONS.length;
+
+  let statusHtml = '';
+  if (i.finished) {
+    if (i.impression === 'strong_yes') statusHtml = `<span class="card-status status-strong">Strong yes</span>`;
+    else if (i.impression === 'maybe') statusHtml = `<span class="card-status status-maybe">Maybe</span>`;
+    else if (i.impression === 'no') statusHtml = `<span class="card-status status-no">No</span>`;
+    else statusHtml = `<span class="card-status status-done">Completed</span>`;
+  } else if (i.started) {
+    statusHtml = `<span class="card-status status-progress">${done}/${total}</span>`;
+  } else {
+    statusHtml = `<span class="card-status">Draft</span>`;
+  }
+
+  const date = i.date || fmtDateShort(new Date(i.createdAt));
+  return `
+    <button class="interview-card ${cls}" data-id="${i.id}">
+      <div class="card-row">
+        <span class="card-name">${esc(i.candidate || 'Unnamed candidate')}</span>
+        <span class="card-meta">${esc(date)}</span>
+      </div>
+      <div class="card-detail">
+        <span class="card-role">${esc(i.role || 'Senior Engineer')}${i.interviewer ? ' · ' + esc(i.interviewer) : ''}</span>
+        ${statusHtml}
+      </div>
+    </button>`;
+}
+
+function openInterview(id) {
+  const i = getInterview(id);
+  if (!i) return;
+  currentId = id;
+  if (i.finished) renderEnd();
+  else if (i.started) renderQuestion(i.currentIndex);
+  else renderSetup(i);
+}
+
+function startNewInterview() {
+  const i = newInterview();
+  i.date = todayISO();
+  store.interviews.push(i);
+  saveStore();
+  currentId = i.id;
+  renderSetup(i);
+}
+
+function goLibrary() {
+  // Clean up empty drafts
+  const i = currentId ? getInterview(currentId) : null;
+  if (i && !i.started && !i.candidate && !i.role && !i.interviewer) {
+    store.interviews = store.interviews.filter(x => x.id !== i.id);
+    saveStore();
+  }
+  renderLibrary();
+}
+
+// ── Setup screen ──────────────────────────────────────────────────────────
+
+function renderSetup(i) {
+  showScreen('screen-setup');
+  document.getElementById('f-candidate').value = i.candidate || '';
+  document.getElementById('f-role').value = i.role || '';
+  document.getElementById('f-date').value = i.date || todayISO();
+  document.getElementById('f-interviewer').value = i.interviewer || '';
+  setTimeout(() => document.getElementById('f-candidate').focus(), 50);
+}
+
+function commitNewInterview() {
+  const i = getInterview(currentId);
+  if (!i) return;
+  const candidate = document.getElementById('f-candidate').value.trim();
+  if (!candidate) {
+    document.getElementById('f-candidate').focus();
+    return;
+  }
+  i.candidate = candidate;
+  i.role = document.getElementById('f-role').value.trim();
+  i.date = document.getElementById('f-date').value;
+  i.interviewer = document.getElementById('f-interviewer').value.trim();
+  i.started = true;
+  i.currentIndex = 0;
+  touch(i);
+  renderQuestion(0);
+}
+
+// ── Question screen ──────────────────────────────────────────────────────
+
+function renderQuestion(index) {
+  const i = getInterview(currentId);
+  if (!i) return goLibrary();
+  i.currentIndex = index;
+  touch(i);
+
+  const q = QUESTIONS[index];
+  const a = getAnswer(i, q.id);
+  const total = QUESTIONS.length;
+  const caseNo = String(index + 1).padStart(2, '0');
+  const totalNo = String(total).padStart(2, '0');
+
+  const dotsHtml = QUESTIONS.map((_, idx) => {
+    const ans = i.answers[QUESTIONS[idx].id];
+    let cls = '';
+    if (idx === index) cls = 'current';
+    else if (ans && ans.skipped) cls = 'skipped';
+    else if (ans && (ans.signals.length || ans.crossSignals.length || ans.notes)) cls = 'done';
+    return `<div class="dot ${cls}"></div>`;
+  }).join('');
+
+  const signalsHtml = q.signals.map((s, idx) => `
+    <label class="sig-row">
+      <input type="checkbox" data-type="signal" data-index="${idx}" ${a.signals.includes(idx) ? 'checked' : ''}>
+      <span>${esc(s)}</span>
+    </label>`).join('');
+
+  const crossHtml = CROSS_SIGNALS.map((s, idx) => `
+    <label class="sig-row">
+      <input type="checkbox" data-type="cross" data-index="${idx}" ${a.crossSignals.includes(idx) ? 'checked' : ''}>
+      <span>${esc(s)}</span>
+    </label>`).join('');
+
+  const html = `
+    <header class="topbar">
+      <button class="topbar-back" onclick="goLibrary()">Library</button>
+      <div class="wordmark">File ${caseNo} / ${totalNo}<span class="dot">.</span></div>
+    </header>
+
+    <div class="q-status">
+      <div class="q-status-left"><span class="case-no">${esc(q.label)}</span></div>
+      <div class="q-status-right"><span class="candidate-name">${esc(i.candidate)}</span></div>
+    </div>
+
+    <div class="dots">${dotsHtml}</div>
+
+    <div class="q-tags">
+      ${q.required ? '<span class="tag-required">Required</span>' : '<span class="tag-optional">Optional</span>'}
+      <span class="tag-time">${esc(q.time)}</span>
+    </div>
+
+    <div class="q-label-line">Question ${caseNo}</div>
+    <h2 class="q-text">${esc(q.text)}</h2>
+    ${q.skipHint
+      ? `<div class="q-skip-hint">${esc(q.skipHint)}</div>`
+      : `<div class="q-no-hint"></div>`}
+
+    <button class="expand-btn" id="drills-btn" onclick="togglePanel('drills-btn','drills-panel')">
+      <span class="arrow">▶</span><span>Drill prompts</span>
+    </button>
+    <div class="drills-panel" id="drills-panel">
+      <ol>${q.drills.map(d => `<li>${esc(d)}</li>`).join('')}</ol>
+    </div>
+
+    <div class="section-label">Signals — tap as you hear them</div>
+    <div class="signals-list">${signalsHtml}</div>
+
+    <button class="cross-toggle" id="cross-btn" onclick="toggleCross()">▸ Cross-cutting signals</button>
+    <div class="cross-panel" id="cross-panel">
+      <div class="signals-list">${crossHtml}</div>
+    </div>
+
+    <div class="notes-section">
+      <div class="section-label">Notes</div>
+      <textarea id="notes-field" placeholder='Exact quotes go here. "We" vs "I" is data.' rows="4">${esc(a.notes || '')}</textarea>
+    </div>
+
+    <div class="nav">
+      <div>
+        ${index > 0 ? `<button class="btn btn-secondary" onclick="goBack()">← Back</button>` : '<span></span>'}
+      </div>
+      <div class="nav-actions">
+        ${!q.required ? `<button class="btn-skip" onclick="skipQuestion()">Skip</button>` : ''}
+        <button class="btn btn-primary" onclick="advance()">
+          ${index === total - 1 ? 'Finish →' : 'Next →'}
+        </button>
+      </div>
+    </div>`;
+
+  const screen = document.getElementById('screen-question');
+  screen.innerHTML = html;
+  showScreen('screen-question');
+  window.scrollTo(0, 0);
+
+  screen.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.addEventListener('change', onCheckbox);
+  });
+  document.getElementById('notes-field').addEventListener('input', onNotes);
+}
+
+function togglePanel(btnId, panelId) {
+  document.getElementById(btnId).classList.toggle('open');
+  document.getElementById(panelId).classList.toggle('open');
+}
+function toggleCross() {
+  const p = document.getElementById('cross-panel');
+  const b = document.getElementById('cross-btn');
+  p.classList.toggle('open');
+  b.textContent = (p.classList.contains('open') ? '▾' : '▸') + ' Cross-cutting signals';
+}
+
+function onCheckbox(e) {
+  const cb = e.target;
+  const i = getInterview(currentId);
+  const q = QUESTIONS[i.currentIndex];
+  const a = getAnswer(i, q.id);
+  const arr = cb.dataset.type === 'signal' ? a.signals : a.crossSignals;
+  const idx = parseInt(cb.dataset.index);
+  if (cb.checked) { if (!arr.includes(idx)) arr.push(idx); }
+  else { const j = arr.indexOf(idx); if (j !== -1) arr.splice(j, 1); }
+  touch(i);
+}
+
+function onNotes(e) {
+  const i = getInterview(currentId);
+  const q = QUESTIONS[i.currentIndex];
+  getAnswer(i, q.id).notes = e.target.value;
+  touch(i);
+}
+
+function advance() {
+  const i = getInterview(currentId);
+  const q = QUESTIONS[i.currentIndex];
+  const a = getAnswer(i, q.id);
+  a.notes = document.getElementById('notes-field').value;
+  a.skipped = false;
+  if (i.currentIndex === QUESTIONS.length - 1) {
+    i.finished = true;
+    touch(i);
+    renderEnd();
+  } else {
+    renderQuestion(i.currentIndex + 1);
+  }
+}
+
+function skipQuestion() {
+  const i = getInterview(currentId);
+  const q = QUESTIONS[i.currentIndex];
+  const a = getAnswer(i, q.id);
+  a.skipped = true;
+  touch(i);
+  if (i.currentIndex === QUESTIONS.length - 1) {
+    i.finished = true;
+    touch(i);
+    renderEnd();
+  } else {
+    renderQuestion(i.currentIndex + 1);
+  }
+}
+
+function goBack() {
+  const i = getInterview(currentId);
+  if (i.currentIndex > 0) renderQuestion(i.currentIndex - 1);
+}
+
+// ── End screen ───────────────────────────────────────────────────────────
+
+function renderEnd() {
+  const i = getInterview(currentId);
+  if (!i) return goLibrary();
+
+  const summaryHtml = QUESTIONS.map(q => {
+    const a = getAnswer(i, q.id);
+    const checked = [
+      ...a.signals.map(idx => q.signals[idx]),
+      ...a.crossSignals.map(idx => CROSS_SIGNALS[idx])
+    ];
+    const hasSignals = checked.length > 0;
+    return `
+      <div class="sum-item ${a.skipped ? 'skipped' : ''} ${hasSignals ? 'has-signals' : ''}">
+        <div class="sum-header">
+          <span class="sum-label">${esc(q.label)}${a.skipped ? ' <em>(skipped)</em>' : ''}</span>
+          <span class="sum-score">${a.skipped ? '—' : checked.length + ' signal' + (checked.length !== 1 ? 's' : '')}</span>
+        </div>
+        ${checked.length ? `<div class="sum-signals-line"><span class="check">✓</span>${checked.map(esc).join(' · ')}</div>` : ''}
+        ${a.notes ? `<div class="sum-notes">${esc(a.notes)}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  const impressions = [
+    ['strong_yes', 'Strong Yes', 'imp-strong'],
+    ['maybe', 'Maybe', 'imp-maybe'],
+    ['no', 'No', 'imp-no']
+  ];
+  const impHtml = impressions.map(([val, label, cls]) =>
+    `<button class="imp-btn ${cls} ${i.impression === val ? 'selected' : ''}" data-val="${val}" onclick="setImpression('${val}')">${label}</button>`
+  ).join('');
+
+  const html = `
+    <header class="topbar">
+      <button class="topbar-back" onclick="goLibrary()">Library</button>
+      <div class="wordmark">Verdict<span class="dot">.</span></div>
+    </header>
+
+    <h1 class="end-heading">Case file <em>closed</em></h1>
+    <p class="end-meta">
+      <span>${esc(i.candidate)}</span>
+      ${i.role ? `<span class="sep">·</span><span>${esc(i.role)}</span>` : ''}
+      ${i.date ? `<span class="sep">·</span><span>${esc(i.date)}</span>` : ''}
+      ${i.interviewer ? `<span class="sep">·</span><span>${esc(i.interviewer)}</span>` : ''}
+    </p>
+
+    <div class="section-label">Overall impression</div>
+    <div class="impression-row">${impHtml}</div>
+
+    <div class="section-label">Global notes</div>
+    <textarea id="global-notes" placeholder="Anything that didn't fit elsewhere..." rows="3">${esc(i.globalNotes || '')}</textarea>
+
+    <div class="divider"></div>
+
+    <div class="section-label">Question summary</div>
+    <div class="summary">${summaryHtml}</div>
+
+    <div class="export-section">
+      <button class="export-btn" onclick="exportCSV()">Export this interview as CSV</button>
+      <div class="end-actions">
+        <button class="btn btn-secondary" onclick="resumeEdit()">Edit answers</button>
+        <button class="btn btn-secondary" onclick="goLibrary()">Back to library</button>
+      </div>
+    </div>`;
+
+  document.getElementById('screen-end').innerHTML = html;
+  showScreen('screen-end');
+  window.scrollTo(0, 0);
+
+  document.getElementById('global-notes').addEventListener('input', e => {
+    const cur = getInterview(currentId);
+    cur.globalNotes = e.target.value;
+    touch(cur);
+  });
+}
+
+function setImpression(val) {
+  const i = getInterview(currentId);
+  i.impression = val;
+  touch(i);
+  document.querySelectorAll('.imp-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.val === val);
+  });
+}
+
+function resumeEdit() {
+  const i = getInterview(currentId);
+  i.finished = false;
+  touch(i);
+  renderQuestion(i.currentIndex);
+}
+
+// ── CSV / JSON Export ────────────────────────────────────────────────────
+
+function exportCSV() {
+  const i = getInterview(currentId);
+  const notes = document.getElementById('global-notes');
+  if (notes) { i.globalNotes = notes.value; touch(i); }
+
+  const header = ['candidate','role','date','interviewer','question_id','question_label','required','skipped','signals_checked','signals_total','signals_list','notes'];
+  const rows = [header];
+
+  QUESTIONS.forEach(q => {
+    const a = getAnswer(i, q.id);
+    const checked = [
+      ...a.signals.map(idx => q.signals[idx]),
+      ...a.crossSignals.map(idx => CROSS_SIGNALS[idx])
+    ];
+    rows.push([
+      i.candidate, i.role, i.date, i.interviewer,
+      q.id, q.label,
+      q.required ? 'yes' : 'no',
+      a.skipped ? 'yes' : 'no',
+      checked.length,
+      q.signals.length + CROSS_SIGNALS.length,
+      checked.join('; '),
+      a.notes || ''
+    ]);
+  });
+
+  rows.push([
+    i.candidate, i.role, i.date, i.interviewer,
+    '_summary', 'Overall impression', '', '', '', '',
+    i.impression || '', i.globalNotes || ''
+  ]);
+
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const name = (i.candidate || 'candidate').replace(/\s+/g, '-').toLowerCase();
+  const date = i.date || todayISO();
+  download(`${name}-${date}.csv`, csv, 'text/csv');
+}
+
+function exportAllJSON() {
+  if (store.interviews.length === 0) { alert('No interviews to export.'); return; }
+  const blob = JSON.stringify(store, null, 2);
+  const filename = `casebook-backup-${todayISO()}.json`;
+  download(filename, blob, 'application/json');
+}
+
+function importBackup() {
+  document.getElementById('import-file').click();
+}
+
+function onImportFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.interviews || !Array.isArray(data.interviews)) throw new Error('Invalid backup');
+      const existingIds = new Set(store.interviews.map(i => i.id));
+      const incoming = data.interviews.filter(i => !existingIds.has(i.id));
+      if (incoming.length === 0) {
+        alert('No new interviews to import (all already exist).');
+        return;
+      }
+      if (!confirm(`Import ${incoming.length} interview(s)?`)) return;
+      store.interviews.push(...incoming);
+      saveStore();
+      renderLibrary();
+    } catch (err) {
+      alert('Could not read backup file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function download(filename, content, mime) {
+  const a = document.createElement('a');
+  const blob = new Blob([content], { type: mime });
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }, 100);
+}
+
+function confirmWipe() {
+  if (!confirm('Delete ALL interviews on this device? This cannot be undone.')) return;
+  if (!confirm('Are you absolutely sure? Export a backup first if you want to keep anything.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  store = { interviews: [] };
+  renderLibrary();
+}
+
+// ── Utilities ────────────────────────────────────────────────────────────
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function esc(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function todayISO() { return new Date().toISOString().split('T')[0]; }
+function fmtDateShort(d) {
+  return d.toISOString().split('T')[0];
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+
+loadStore();
+renderLibrary();
+</script>
+</body>
+</html>

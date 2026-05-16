@@ -117,6 +117,12 @@ h1 {
 }
 .library-stats strong { color: var(--ink); font-weight: 600; }
 
+.new-cta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 28px;
+}
 .new-cta {
   display: flex;
   align-items: center;
@@ -126,16 +132,34 @@ h1 {
   color: white;
   padding: 14px 20px;
   border-radius: 6px;
-  border: none;
+  border: 1px solid var(--ink);
   cursor: pointer;
   font: inherit;
   font-weight: 600;
   font-size: 0.95rem;
   width: 100%;
-  margin-bottom: 28px;
   min-height: 48px;
 }
 .new-cta:hover { background: #000; }
+.new-cta-secondary {
+  background: white;
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+.new-cta-secondary:hover { background: var(--bg-soft); border-color: var(--ink-soft); }
+
+.type-pill {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.type-pill.type-hr { background: #eef4fb; color: #1f4f8b; }
+.type-pill.type-tech { background: #f2efe6; color: #6b4f1a; }
 
 .empty-state {
   border: 1px dashed var(--line-strong);
@@ -597,7 +621,10 @@ textarea {
 
     <div class="library-stats" id="library-stats"></div>
 
-    <button class="new-cta" onclick="startNewInterview()">+ New interview</button>
+    <div class="new-cta-row">
+      <button class="new-cta" onclick="startNewInterview('hr')">+ New initial HR interview</button>
+      <button class="new-cta new-cta-secondary" onclick="startNewInterview('technical')">+ New technical interview</button>
+    </div>
 
     <div id="library-content"></div>
 
@@ -613,10 +640,10 @@ textarea {
   <section class="screen" id="screen-setup">
     <header class="topbar">
       <button class="topbar-back" onclick="goLibrary()">Library</button>
-      <div class="wordmark light">New interview</div>
+      <div class="wordmark light" id="setup-wordmark">New interview</div>
     </header>
 
-    <h1>New interview</h1>
+    <h1 id="setup-heading">New interview</h1>
     <p class="sub">Fill in candidate details to begin.</p>
 
     <div class="field">
@@ -650,7 +677,7 @@ textarea {
 </main>
 
 <script>
-const QUESTIONS = [
+const TECH_QUESTIONS = [
   {
     id: 'opening', label: '48h Production Access', required: true, time: '8–10 min',
     text: "Imagine you get production access to our system tomorrow. What do you try to understand in the first 48 hours?",
@@ -794,6 +821,143 @@ const QUESTIONS = [
   }
 ];
 
+const HR_QUESTIONS = [
+  {
+    id: 'hr_communication', label: 'Communication & English clarity', required: true, time: '5–7 min',
+    text: "Can you walk me through a project you owned end-to-end — what it was, what you did, and what the outcome was?",
+    drills: [
+      "What was the problem you were solving — in non-technical terms?",
+      "How did you explain that to a non-engineer at the time?",
+      "What part of this would be hard to explain to your CEO?"
+    ],
+    signals: [
+      "Structured the answer (context → problem → action → outcome)",
+      "Adapts jargon down when probed",
+      "Pauses and clarifies when question is ambiguous",
+      "Comfortable English under conversational pressure",
+      "Did not ramble or get fragmented"
+    ]
+  },
+  {
+    id: 'hr_ownership', label: 'Ownership', required: true, time: '5–7 min',
+    text: "Tell me about the most ambitious thing you've ever owned — not just contributed to, but owned. Walk me through how it ended.",
+    drills: [
+      "Who decided what to build? Who decided when it was done?",
+      "What was the hardest decision you had to make alone?",
+      "What did you do when something went wrong?",
+      "What was the impact — how do you know?"
+    ],
+    signals: [
+      'Uses "I" naturally, distinguishes self from team',
+      "Describes decisions they made, not just tasks executed",
+      "Names a setback and how they handled it",
+      "Can quantify impact (users, revenue, latency — anything concrete)",
+      'Avoids constant "we" with no personal contribution'
+    ]
+  },
+  {
+    id: 'hr_ambiguity', label: 'Ambiguity & autonomy', required: true, time: '4–6 min',
+    text: "Tell me about a time you had to start working on something where the requirements were unclear or kept changing. How did you handle it?",
+    drills: [
+      "Who did you go to first — and why them?",
+      "What did you decide on your own vs. escalate?",
+      "Did the direction change midway? How did you adapt?"
+    ],
+    signals: [
+      "Asks clarifying questions before acting",
+      "Makes assumptions explicit and validates them",
+      "Defines a starting direction even without full clarity",
+      "Communicates risks proactively",
+      "Did not just wait for instructions"
+    ]
+  },
+  {
+    id: 'hr_maturity', label: 'Maturity', required: true, time: '4–6 min',
+    text: "Tell me about a time something you owned failed or went badly. What happened, and what changed afterwards?",
+    drills: [
+      "What was your role in the failure?",
+      "What did you learn? What do you do differently now?",
+      "Who was affected? Did you talk to them about it?"
+    ],
+    signals: [
+      "Names their role in the failure without prompting",
+      "Specific lesson tied to a specific behavior change",
+      "Emotional honesty — not just a tidy lessons-learned narrative",
+      "Has a real story with specifics",
+      "Did not externalize blame or minimize"
+    ]
+  },
+  {
+    id: 'hr_engagement', label: 'Engagement & role fit', required: true, time: '6–8 min',
+    text: "What attracted you to this role specifically? What questions do you have about us, the product, or the team?",
+    drills: [
+      "What did you read or watch about us before this call?",
+      "What's a question you couldn't answer from public material?",
+      "What would make this role a bad fit for you?"
+    ],
+    signals: [
+      "Has researched the product — describes it in their own words",
+      "Asks specific questions about work, team, or product direction",
+      "Names what they're optimizing for in their next role",
+      "Honest about what would make it a bad fit",
+      "Did not have only logistics questions (PTO, hours)"
+    ]
+  },
+  {
+    id: 'hr_product_thinking', label: 'Product thinking (basic)', required: false, time: '3–4 min',
+    skipHint: 'Skip if product mindset already came up.',
+    text: "When you build something, how do you decide what's good enough to ship?",
+    drills: [
+      "Walk me through a recent example.",
+      "What did you choose to leave out?",
+      "Who decided what was good enough?"
+    ],
+    signals: [
+      "Thinks about user impact",
+      "Considers trade-offs explicitly",
+      "Names what can wait",
+      "Has a concrete example, not abstract"
+    ]
+  },
+  {
+    id: 'hr_remote', label: 'Remote / async work', required: false, time: '3–4 min',
+    skipHint: 'Skip if not relevant or already covered.',
+    text: "Have you worked with US-based or fully-remote teams before? What was different about it?",
+    drills: [
+      "How do you handle time-zone overlap?",
+      "What does good written communication look like to you?",
+      "Where did remote work cause problems for you?"
+    ],
+    signals: [
+      "Comfortable with async communication",
+      "Names specific practices or tools",
+      "Awareness of time-zone constraints",
+      "Has strong written-clarity stories"
+    ]
+  },
+  {
+    id: 'hr_ai_workflow', label: 'AI-assisted development', required: false, time: '3–4 min',
+    skipHint: 'Skip if role does not expect autonomous AI use.',
+    text: "How do you use AI tools in your day-to-day work?",
+    drills: [
+      "Give me a concrete example from this week.",
+      "Where did it help — where didn't it?",
+      "How do you validate what AI gives you?"
+    ],
+    signals: [
+      "Concrete example with specifics",
+      "Names limits or validation needed",
+      'Not just "autocomplete"',
+      "Aware of failure modes"
+    ]
+  }
+];
+
+const QUESTION_SETS = { technical: TECH_QUESTIONS, hr: HR_QUESTIONS };
+const TYPE_LABELS = { technical: 'Technical', hr: 'Initial HR' };
+function qsFor(i) { return QUESTION_SETS[(i && i.type) || 'technical']; }
+function labelFor(i) { return TYPE_LABELS[(i && i.type) || 'technical']; }
+
 const CROSS_SIGNALS = [
   'Uses "I" consistently',
   'Names numbers / dates / specifics',
@@ -822,9 +986,10 @@ function uuid() {
   return 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
 }
 
-function newInterview() {
+function newInterview(type) {
   return {
     id: uuid(),
+    type: type || 'technical',
     candidate: '', role: '', date: '', interviewer: '',
     createdAt: Date.now(), updatedAt: Date.now(),
     answers: {}, currentIndex: 0,
@@ -867,7 +1032,7 @@ function renderLibrary() {
     content.innerHTML = `
       <div class="empty-state">
         <strong>No interviews yet</strong>
-        Tap "New interview" above to begin.
+        Tap one of the buttons above to begin.
       </div>`;
     return;
   }
@@ -894,7 +1059,9 @@ function renderLibrary() {
 
 function cardHtml(i) {
   const done = Object.values(i.answers).filter(a => a.signals.length || a.crossSignals.length || a.notes || a.skipped).length;
-  const total = QUESTIONS.length;
+  const total = qsFor(i).length;
+  const typeLabel = labelFor(i);
+  const typeCls = (i.type || 'technical') === 'hr' ? 'type-hr' : 'type-tech';
 
   let status = '';
   if (i.finished) {
@@ -916,7 +1083,7 @@ function cardHtml(i) {
         <span class="card-meta">${esc(date)}</span>
       </div>
       <div class="card-detail">
-        <span class="card-role">${esc(i.role || 'Senior Engineer')}${i.interviewer ? ' · ' + esc(i.interviewer) : ''}</span>
+        <span class="card-role"><span class="type-pill ${typeCls}">${esc(typeLabel)}</span>${esc(i.role || 'Senior Engineer')}${i.interviewer ? ' · ' + esc(i.interviewer) : ''}</span>
         ${status}
       </div>
     </button>`;
@@ -931,8 +1098,8 @@ function openInterview(id) {
   else renderSetup(i);
 }
 
-function startNewInterview() {
-  const i = newInterview();
+function startNewInterview(type) {
+  const i = newInterview(type);
   i.date = todayISO();
   store.interviews.push(i);
   saveStore();
@@ -953,6 +1120,9 @@ function goLibrary() {
 
 function renderSetup(i) {
   showScreen('screen-setup');
+  const label = labelFor(i);
+  document.getElementById('setup-heading').textContent = `New ${label.toLowerCase()} interview`;
+  document.getElementById('setup-wordmark').textContent = `New ${label.toLowerCase()} interview`;
   document.getElementById('f-candidate').value = i.candidate || '';
   document.getElementById('f-role').value = i.role || '';
   document.getElementById('f-date').value = i.date || todayISO();
@@ -986,9 +1156,10 @@ function renderQuestion(index) {
   i.currentIndex = index;
   touch(i);
 
-  const q = QUESTIONS[index];
+  const qs = qsFor(i);
+  const q = qs[index];
   const a = getAnswer(i, q.id);
-  const total = QUESTIONS.length;
+  const total = qs.length;
   const pct = Math.round(((index) / total) * 100);
 
   const signalsHtml = q.signals.map((s, idx) => `
@@ -1006,7 +1177,7 @@ function renderQuestion(index) {
   const html = `
     <header class="topbar">
       <button class="topbar-back" onclick="goLibrary()">Library</button>
-      <div class="wordmark light">${index + 1} of ${total}</div>
+      <div class="wordmark light">${esc(labelFor(i))} · ${index + 1} of ${total}</div>
     </header>
 
     <div class="q-status">
@@ -1083,7 +1254,7 @@ function toggleCross() {
 function onCheckbox(e) {
   const cb = e.target;
   const i = getInterview(currentId);
-  const q = QUESTIONS[i.currentIndex];
+  const q = qsFor(i)[i.currentIndex];
   const a = getAnswer(i, q.id);
   const arr = cb.dataset.type === 'signal' ? a.signals : a.crossSignals;
   const idx = parseInt(cb.dataset.index);
@@ -1094,18 +1265,19 @@ function onCheckbox(e) {
 
 function onNotes(e) {
   const i = getInterview(currentId);
-  const q = QUESTIONS[i.currentIndex];
+  const q = qsFor(i)[i.currentIndex];
   getAnswer(i, q.id).notes = e.target.value;
   touch(i);
 }
 
 function advance() {
   const i = getInterview(currentId);
-  const q = QUESTIONS[i.currentIndex];
+  const qs = qsFor(i);
+  const q = qs[i.currentIndex];
   const a = getAnswer(i, q.id);
   a.notes = document.getElementById('notes-field').value;
   a.skipped = false;
-  if (i.currentIndex === QUESTIONS.length - 1) {
+  if (i.currentIndex === qs.length - 1) {
     i.finished = true;
     touch(i);
     renderEnd();
@@ -1116,11 +1288,12 @@ function advance() {
 
 function skipQuestion() {
   const i = getInterview(currentId);
-  const q = QUESTIONS[i.currentIndex];
+  const qs = qsFor(i);
+  const q = qs[i.currentIndex];
   const a = getAnswer(i, q.id);
   a.skipped = true;
   touch(i);
-  if (i.currentIndex === QUESTIONS.length - 1) {
+  if (i.currentIndex === qs.length - 1) {
     i.finished = true;
     touch(i);
     renderEnd();
@@ -1140,7 +1313,7 @@ function renderEnd() {
   const i = getInterview(currentId);
   if (!i) return goLibrary();
 
-  const summaryHtml = QUESTIONS.map(q => {
+  const summaryHtml = qsFor(i).map(q => {
     const a = getAnswer(i, q.id);
     const checked = [
       ...a.signals.map(idx => q.signals[idx]),
@@ -1169,7 +1342,7 @@ function renderEnd() {
   const html = `
     <header class="topbar">
       <button class="topbar-back" onclick="goLibrary()">Library</button>
-      <div class="wordmark light">Summary</div>
+      <div class="wordmark light">${esc(labelFor(i))} · Summary</div>
     </header>
 
     <h1>Interview complete</h1>
@@ -1231,17 +1404,18 @@ function exportCSV() {
   const notes = document.getElementById('global-notes');
   if (notes) { i.globalNotes = notes.value; touch(i); }
 
-  const header = ['candidate','role','date','interviewer','question_id','question_label','required','skipped','signals_checked','signals_total','signals_list','notes'];
+  const header = ['candidate','role','date','interviewer','interview_type','question_id','question_label','required','skipped','signals_checked','signals_total','signals_list','notes'];
   const rows = [header];
+  const typeLabel = labelFor(i);
 
-  QUESTIONS.forEach(q => {
+  qsFor(i).forEach(q => {
     const a = getAnswer(i, q.id);
     const checked = [
       ...a.signals.map(idx => q.signals[idx]),
       ...a.crossSignals.map(idx => CROSS_SIGNALS[idx])
     ];
     rows.push([
-      i.candidate, i.role, i.date, i.interviewer,
+      i.candidate, i.role, i.date, i.interviewer, typeLabel,
       q.id, q.label,
       q.required ? 'yes' : 'no',
       a.skipped ? 'yes' : 'no',
@@ -1252,7 +1426,7 @@ function exportCSV() {
     ]);
   });
   rows.push([
-    i.candidate, i.role, i.date, i.interviewer,
+    i.candidate, i.role, i.date, i.interviewer, typeLabel,
     '_summary', 'Overall impression', '', '', '', '',
     i.impression || '', i.globalNotes || ''
   ]);
@@ -1260,7 +1434,8 @@ function exportCSV() {
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
   const name = (i.candidate || 'candidate').replace(/\s+/g, '-').toLowerCase();
   const date = i.date || todayISO();
-  download(`${name}-${date}.csv`, csv, 'text/csv');
+  const tag = (i.type || 'technical') === 'hr' ? 'hr' : 'tech';
+  download(`${name}-${tag}-${date}.csv`, csv, 'text/csv');
 }
 
 function exportAllJSON() {
